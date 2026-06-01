@@ -57,6 +57,7 @@ function buildRewrittenSpider(
   spider: string,
   workerBaseUrl: string,
   urlKeyMap: Map<string, string>,
+  accessToken?: string,
 ): string | null {
   if (!spider) return null;
 
@@ -68,7 +69,10 @@ function buildRewrittenSpider(
   const key = urlKeyMap.get(parsed.url);
   if (!key) return null;
 
-  const proxyUrl = `${workerBaseUrl.replace(/\/$/, '')}/jar/${key}`;
+  let proxyUrl = `${workerBaseUrl.replace(/\/$/, '')}/jar/${key}`;
+  if (accessToken) {
+    proxyUrl += `?access_token=${encodeURIComponent(accessToken)}`;
+  }
   if (parsed.md5) {
     return `${parsed.prefix}${proxyUrl};md5;${parsed.md5}`;
   }
@@ -86,6 +90,7 @@ export async function rewriteJarUrls(
   config: TVBoxConfig,
   workerBaseUrl: string,
   storage: Storage,
+  accessToken?: string,
 ): Promise<TVBoxConfig> {
   // Step 1: 收集所有唯一 JAR URL
   const uniqueJars = new Map<string, { md5: string | null }>(); // url → {md5}
@@ -129,14 +134,14 @@ export async function rewriteJarUrls(
   const result = { ...config };
 
   if (result.spider) {
-    const rewritten = buildRewrittenSpider(result.spider, workerBaseUrl, urlKeyMap);
+    const rewritten = buildRewrittenSpider(result.spider, workerBaseUrl, urlKeyMap, accessToken);
     if (rewritten) result.spider = rewritten;
   }
 
   if (result.sites) {
     result.sites = result.sites.map((site) => {
       if (!site.jar) return site;
-      const rewritten = buildRewrittenSpider(site.jar, workerBaseUrl, urlKeyMap);
+      const rewritten = buildRewrittenSpider(site.jar, workerBaseUrl, urlKeyMap, accessToken);
       if (rewritten) return { ...site, jar: rewritten };
       return site;
     });

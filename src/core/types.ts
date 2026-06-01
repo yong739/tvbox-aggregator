@@ -160,6 +160,7 @@ export interface AppConfig {
   workerBaseUrl?: string;  // CF 版设置，如 "https://tvbox.example.com"；本地不设置
   localBaseUrl?: string;   // Node.js 版设置，如 "http://192.168.1.100:5678"；用于 JAR 代理
   dockerMissingBaseUrl?: boolean;  // Docker 环境未配置 BASE_URL 时为 true
+  accessToken?: string;    // 访问令牌，设置后所有公开端点需携带 ?access_token=xxx 或 Authorization: Bearer xxx
   // 自动抓取配置（环境变量驱动，未配置则不启用）
   scrapeSourceUrl?: string;
   scrapeSourceReferer?: string;

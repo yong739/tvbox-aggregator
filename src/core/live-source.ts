@@ -123,6 +123,7 @@ export async function liveSourcesToTVBoxLives(
   workerBaseUrl: string | undefined,
   storage: Storage,
   speedMap?: Map<string, number>,
+  accessToken?: string,
 ): Promise<TVBoxLive[]> {
   const lives: TVBoxLive[] = [];
 
@@ -134,7 +135,11 @@ export async function liveSourcesToTVBoxLives(
       // CF 模式：改写 URL + 写 KV 代理映射
       const key = await urlToKey(entry.url);
       await storage.put(`${KV_LIVE_PREFIX}${key}`, entry.url);
-      url = `${workerBaseUrl.replace(/\/$/, '')}/live/${key}`;
+      let proxyUrl = `${workerBaseUrl.replace(/\/$/, '')}/live/${key}`;
+      if (accessToken) {
+        proxyUrl += `?access_token=${encodeURIComponent(accessToken)}`;
+      }
+      url = proxyUrl;
     } else if (speedMap) {
       // 本地模式：追加延迟到 name
       const ms = speedMap.get(entry.url);

@@ -48,6 +48,7 @@ export function macCMSToTVBoxSites(
   entries: MacCMSSourceEntry[],
   proxyBaseUrl?: string,
   speedMap?: Map<string, number>,
+  accessToken?: string,
 ): TVBoxSite[] {
   return entries.map((entry) => {
     let name = entry.name;
@@ -57,13 +58,21 @@ export function macCMSToTVBoxSites(
       name = `${name} [${seconds}s]`;
     }
 
+    let api: string;
+    if (proxyBaseUrl) {
+      api = `${proxyBaseUrl.replace(/\/$/, '')}/api/${entry.key}`;
+      if (accessToken) {
+        api += `?access_token=${encodeURIComponent(accessToken)}`;
+      }
+    } else {
+      api = entry.api;
+    }
+
     return {
       key: entry.key,
       name,
       type: 1,
-      api: proxyBaseUrl
-        ? `${proxyBaseUrl.replace(/\/$/, '')}/api/${entry.key}`
-        : entry.api,
+      api,
       searchable: 1,
       quickSearch: 1,
       filterable: 1,
